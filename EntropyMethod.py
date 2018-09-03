@@ -73,7 +73,7 @@ def ApproximateEntropy(X, m, r, tao=1):
 	else:
 		dX = X
 
-	# Compute SampleEntropy
+	# Compute ApproximateEntropy
 	N = dX.shape[0]
 	ApEn = np.zeros([Len])
 	for i in range(Len):
@@ -228,6 +228,126 @@ def FuzzyEntropy(X, m, r, tao = 1):
 		FzEn[i] = -np.log(phi(dX[:, i], m + 1, stdX[i]) / phi(dX[:, i], m, stdX[i]))
 	return FzEn
 
+def DistributionEntropy(X, m, M='auto', tao=1):
+	""" DistributionEntropy Entropy
+		返回信号的分布熵。
+	Parameters
+	----------
+	X :  array_like
+		Array containing numbers whose fuzzy entrpy is desired. X must be a array.
+
+	m :  int
+		空间维度m, 其值必须为正整数
+
+	M ：int or str, optional
+		估算ePDF时直方图的个数
+
+        If `bins` is an int, it defines the number of equal-width
+        bins in the given range
+
+        If `bins` is a string from the list below, `histogram` will use
+        the method chosen to calculate the optimal bin width and
+        consequently the number of bins (see `Notes` for more detail on
+        the estimators) from the data that falls within the requested
+        range. While the bin width will be optimal for the actual data
+        in the range, the number of bins will be computed to fill the
+        entire range, including the empty portions. For visualisation,
+        using the 'auto' option is suggested. Weighted data is not
+        supported for automated bin size selection.
+
+        'auto'
+            Maximum of the 'sturges' and 'fd' estimators. Provides good
+            all around performance.
+
+        'fd' (Freedman Diaconis Estimator)
+            Robust (resilient to outliers) estimator that takes into
+            account data variability and data size.
+
+        'doane'
+            An improved version of Sturges' estimator that works better
+            with non-normal datasets.
+
+        'scott'
+            Less robust estimator that that takes into account data
+            variability and data size.
+
+        'rice'
+            Estimator does not take variability into account, only data
+            size. Commonly overestimates number of bins required.
+
+        'sturges'
+            R's default method, only accounts for data size. Only
+            optimal for gaussian data and underestimates number of bins
+            for large non-gaussian datasets.
+
+        'sqrt'
+            Square root (of data size) estimator, used by Excel and
+            other programs for its speed and simplicity.
+
+	tao : int
+		尺度，其值必须为正整数
+
+	Returns
+	-------
+	FzEn : array_like
+		返回每列信号的分布熵
+
+	References
+	-------
+	[1]. Udhayakumar R K, Karmakar C, Li P, et al.
+	Effect of data length and bin numbers on distribution entropy (DistEn) measurement in analyzing healthy aging[J].
+	Conf Proc IEEE Eng Med Biol Soc, 2015:7877-7880.
+
+	[2]. Peng L, Liu C, Ke L, et al.
+	Assessing the complexity of short-term heartbeat interval series by distribution entropy[J].
+	Medical & Biological Engineering & Computing, 2015, 53(1):77-87.
+
+	Examples
+	-------
+	>>> x = np.array([85, 80, 89] *17)
+	>>> m = 2
+	>>> DistributionEntropy(x,m)
+	array([ 0.41186842])
+	"""
+
+
+	# Compute distance
+	def maxdist(x_i, x_j):
+		return max([abs(ua - va) for ua, va in zip(x_i, x_j)])
+
+	# Compute the empirical probability distribution function
+	def ePDF(U, m):
+		x = [[U[j] for j in range(i, i + m - 1 + 1)] for i in range(N - m + 1)]
+		dij = np.array([[maxdist(x_i, x_j) for xj, x_j in enumerate(x) if xj != xi] for xi, x_i in enumerate(x)])
+		hist_count, _ = np.histogram(dij, bins=M ,density=False)
+		return hist_count/(N - m)/(N - m +1)
+
+	# Compute Shanon Entropy
+	def ShanonEntropy(p):
+		p[p<=1e-4]=1
+		return -np.sum(p * np.log(p)) / np.log(len(p))
+
+	# 将一维数组转化成二维矩阵形式
+	try:
+		Num, Len = X.shape
+	except:
+		X = X.reshape([-1,1])
+		Num, Len = X.shape
+
+	# 计算尺度
+	if tao > 1:
+		dX = X[range(0, Num, tao), :]
+	else:
+		dX = X
+
+	# Compute DistributionEntropy
+	N = dX.shape[0]
+	DisEn = np.zeros([Len])
+	for i in range(Len):
+		DisEn[i] = ShanonEntropy(ePDF(dX[:, i], m))
+	return DisEn
+
+
 if __name__ == '__main__':
 	import time
 	x = np.random.random([40,6])
@@ -239,4 +359,6 @@ if __name__ == '__main__':
 	t2 = time.time()
 	apen = ApproximateEntropy(x,m,r)
 	t3 = time.time()
-	print( 1000*np.array([t1-t0,t2-t1,t3-t2]))
+	DisEn = DistributionEntropy(x,m)
+	t4 = time.time()
+	print( 1000*np.array([t1-t0,t2-t1,t3-t2,t4-t3]))
