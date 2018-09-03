@@ -14,7 +14,7 @@ def ApproximateEntropy(X, m, r, tao=1):
 	Parameters
 	----------
 	X :  array_like
-		Array containing numbers whose fuzzy entrpy is desired. X must be a array.
+		Array containing numbers whose approximate entrpy is desired. X must be a array.
 	m :  int
 		空间维度m, 其值必须为正整数
 	r ： int, float or str
@@ -31,6 +31,7 @@ def ApproximateEntropy(X, m, r, tao=1):
 	References
 	-------
 	[1]. https://en.wikipedia.org/wiki/Approximate_entropy#cite_note-Pincus21991-23
+
 	[2]. Pincus, S. M. (1991). "Approximate entropy as a measure of system complexity".
 	Proceedings of the National Academy of Sciences.
 	88 (6): 2297–2301. doi:10.1073/pnas.88.6.2297. PMC 51218 Freely accessible. PMID 11607165
@@ -86,7 +87,7 @@ def SampleEntropy(X, m, r, tao=1):
 	Parameters
 	----------
 	X :  array_like
-		Array containing numbers whose fuzzy entrpy is desired. X must be a array.
+		Array containing numbers whose sample entrpy is desired. X must be a array.
 	m :  int
 		空间维度m, 其值必须为正整数
 	r ： int, float or str
@@ -103,10 +104,12 @@ def SampleEntropy(X, m, r, tao=1):
 	References
 	-------
 	[1]. https://en.wikipedia.org/wiki/Sample_entropy
+
 	[2]. Richman, JS; Moorman, JR (2000).
 	"Physiological time-series analysis using approximate entropy and sample entropy".
 	American Journal of Physiology. Heart and Circulatory Physiology.
 	278 (6): H2039–49. doi:10.1152/ajpheart.2000.278.6.H2039. PMID 10843903
+
 	[3]. Costa, Madalena; Goldberger, Ary; Peng, C.-K. (2005).
 	"Multiscale entropy analysis of biological signals".
 	Physical Review E. 71 (2). doi:10.1103/PhysRevE.71.021906
@@ -234,7 +237,7 @@ def DistributionEntropy(X, m, M='auto', tao=1):
 	Parameters
 	----------
 	X :  array_like
-		Array containing numbers whose fuzzy entrpy is desired. X must be a array.
+		Array containing numbers whose distribution entrpy is desired. X must be a array.
 
 	m :  int
 		空间维度m, 其值必须为正整数
@@ -350,7 +353,8 @@ def DistributionEntropy(X, m, M='auto', tao=1):
 
 if __name__ == '__main__':
 	import time
-	x = np.random.random([40,6])
+	np.random.seed(0)
+	x = np.random.random([100,6])
 	m, r = 2, '0.25std'
 	t0 = time.time()
 	fzen = FuzzyEntropy(x,m,r)
